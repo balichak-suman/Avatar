@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adaptive Cosmic Oracle | Login</title>
+    <script>if (localStorage.getItem("isAuthenticated")) window.location.href = "dashboard.html";</script>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #0a0e1a;
+            font-family: 'Inter', sans-serif;
+            display: block;
+            height: 100vh;
+        }
+
+        /* Video Background */
+        #video-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            object-fit: cover;
+            z-index: 0;
+            opacity: 0.6;
+            filter: brightness(0.8);
+        }
+
+        /* Dark overlay for readability */
+        #video-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at center, transparent 40%, rgba(10, 14, 26, 0.7) 100%);
+            z-index: 0;
+        }
+
+        #canvas-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .login-container {
+            position: absolute;
+            right: 15%;
+            /* Move to the right side */
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 10;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            width: 320px;
+            text-align: center;
+        }
+
+        h2 {
+            color: #fff;
+            margin-bottom: 30px;
+            font-weight: 300;
+            letter-spacing: 2px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        label {
+            color: #a0aec0;
+            font-size: 0.8em;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #fff;
+            outline: none;
+            transition: border-color 0.3s;
+            box-sizing: border-box;
+        }
+
+        input:focus {
+            border-color: #00d9ff;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(45deg, #00d9ff, #0077ff);
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: scale(1.02);
+        }
+
+        .error-msg {
+            color: #ff6b6b;
+            font-size: 0.8em;
+            margin-top: 10px;
+            height: 20px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Video Background -->
+    <video id="video-bg" autoplay muted loop playsinline>
+        <source src="login.mp4" type="video/mp4">
+    </video>
+    <div id="video-overlay"></div>
+
+    <div id="canvas-container"></div>
+
+    <div class="login-container">
+        <h2>ACCESS CONTROL</h2>
+        <div class="input-group">
+            <label>COMMANDER ID</label>
+            <input type="text" id="username" autocomplete="off">
+        </div>
+        <div class="input-group">
+            <label>SECURITY CODE</label>
+            <input type="password" id="password">
+        </div>
+        <div class="input-group" id="otp-group" style="display: none;">
+            <label>2FA UPLINK CODE (OTP)</label>
+            <input type="text" id="otp-input" placeholder="------" maxlength="6"
+                style="letter-spacing: 5px; text-align: center;">
+            <div style="font-size: 0.7rem; color: #facc15; margin-top: 5px; text-align: center;">* CODE SENT TO TERMINAL
+                CONSOLE *</div>
+        </div>
+        <button id="login-btn">INITIALIZE UPLINK</button>
+        <div style="margin-top: 15px; font-size: 0.9em; color: #a0aec0;">
+            New here? <a href="signup.html" style="color: #00d9ff; text-decoration: none;">Create Profile</a> |
+            <a href="forgot_password.html" style="color: #facc15; text-decoration: none;">Forgot Password?</a>
+        </div>
+        <button id="wave-btn"
+            style="margin-top: 10px; background: transparent; border: 1px solid rgba(255,255,255,0.2);">👋 WAVE
+            HELLO</button>
+        <div class="error-msg" id="error-msg">ACCESS DENIED: INVALID CREDENTIALS</div>
+    </div>
+
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://unpkg.com/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script>
+        // --- Scene Setup ---
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x0a0e1a, 0.02);
+
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+        renderer.setClearColor(0x000000, 0); // Transparent canvas so video shows through
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.0;
+        container.appendChild(renderer.domElement);
+
+        // --- Lighting ---
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
+        scene.add(ambientLight);
+
+        const spotLight = new THREE.SpotLight(0xffffff, 2);
+        spotLight.position.set(5, 10, 7);
+        spotLight.angle = Math.PI / 4;
+        spotLight.penumbra = 0.5;
+        spotLight.castShadow = true;
+        scene.add(spotLight);
+
+        const rimLight = new THREE.SpotLight(0x00d9ff, 5);
+        rimLight.position.set(-5, 5, -5);
+        rimLight.lookAt(0, 0, 0);
+        scene.add(rimLight);
+
+        const fillLight = new THREE.PointLight(0x8a2be2, 1);
+        fillLight.position.set(-5, 0, 5);
+        scene.add(fillLight);
+
+        // --- LOAD ROBOT MODEL WITH ANIMATIONS ---
+        let astronaut = null;
+        let mixer = null;
+        let actions = {};
+        let activeAction = null;
+        let headBone = null; // For tracking
+
+        // Particle System
+        let particles = null;
+
+        const loader = new THREE.GLTFLoader();
+        const modelUrl = 'solar_sys/res/RobotExpressive.glb';
+
+        loader.load(modelUrl, function (gltf) {
+            astronaut = gltf.scene;
+            astronaut.scale.set(0.5, 0.5, 0.5);
+            astronaut.position.set(-2, -2.5, 0);
+            astronaut.rotation.y = 0.5;
+
+            scene.add(astronaut);
+
+            // --- Setup Animations ---
+            mixer = new THREE.AnimationMixer(astronaut);
+
+            // Load all animations found in the file
+            // ['Dance', 'Death', 'Idle', 'Jump', 'No', 'Punch', 'Running', 'Sitting', 'Standing', 'ThumbsUp', 'Walking', 'WalkJump', 'Wave', 'Yes']
+            gltf.animations.forEach((clip) => {
+                actions[clip.name] = mixer.clipAction(clip);
+            });
+
+            // Start with Idle
+            if (actions['Idle']) {
+                activeAction = actions['Idle'];
+                activeAction.play();
+            }
+
+            // Find Head Bone for tracking (optional, can mix with animation)
+            astronaut.traverse((child) => {
+                if (child.isMesh) {
+                    child.castShadow = true;
+                    child.receiveShadow = true;
+                }
+                if (child.isBone && child.name === 'Head') {
+                    headBone = child;
+                }
+            });
+
+            createThrusters();
+
+        }, undefined, function (error) {
+            console.error('An error occurred loading the model:', error);
+        });
+
+        // --- Action Control ---
+        function fadeToAction(name, duration) {
+            if (!actions[name]) return;
+            const previousAction = activeAction;
+            activeAction = actions[name];
+
+            if (previousAction !== activeAction) {
+                if (previousAction) previousAction.fadeOut(duration);
+                activeAction.reset().fadeIn(duration).play();
+
+                // Return to Idle after one-shot animations
+                if (name === 'Wave' || name === 'Yes' || name === 'No' || name === 'ThumbsUp' || name === 'Jump') {
+                    const clipDuration = activeAction.getClip().duration;
+                    setTimeout(() => {
+                        fadeToAction('Idle', 0.5);
+                    }, clipDuration * 1000);
+                }
+            }
+        }
+
+        window.triggerAction = (name) => {
+            if (actions[name]) {
+                fadeToAction(name, 0.2);
+            }
+        };
+
+        // --- Thruster Particles ---
+        function createThrusters() {
+            const particleCount = 200;
+            const geometry = new THREE.BufferGeometry();
+            const positions = [];
+            for (let i = 0; i < particleCount; i++) positions.push(0, 0, 0);
+            geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+            const material = new THREE.PointsMaterial({
+                color: 0x00d9ff, size: 0.05, transparent: true, opacity: 0, blending: THREE.AdditiveBlending
+            });
+            particles = new THREE.Points(geometry, material);
+            scene.add(particles);
+        }
+
+        // Store bone references for procedural anim
+        let armRight = null;
+        let lowerArmRight = null;
+        let handRight = null;
+
+        // ... (Loader code already finds these, ensuring they are accessible)
+
+        // Camera
+        camera.position.set(0, 0, 6);
+
+        // --- Input Handling ---
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const loginBtn = document.getElementById('login-btn');
+        const errorMsg = document.getElementById('error-msg');
+        const waveBtn = document.getElementById('wave-btn');
+
+        // Typing State (Just use Idle, maybe look at screen)
+        // We can blend bone rotation on top of animation in the loop
+
+        // State for 2-step login
+        let isOtpStep = false;
+
+        loginBtn.addEventListener('click', async () => {
+            const username = usernameInput.value;
+            const password = passwordInput.value;
+            const otpInput = document.getElementById('otp-input')
+            const otpGroup = document.getElementById('otp-group');
+
+            // --- STEP 2: VERIFY OTP ---
+            if (isOtpStep) {
+                const otp = otpInput.value;
+                if (otp.length < 6) {
+                    errorMsg.innerText = "INVALID OTP FORMAT";
+                    errorMsg.style.opacity = 1;
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/auth/verify-otp', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username, otp })
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        // SUCCESS
+                        localStorage.setItem('isAuthenticated', 'true');
+                        localStorage.setItem('token', data.access_token);
+                        localStorage.setItem('username', username);
+
+                        // Celebrate
+                        if (typeof fadeToAction === "function" && actions['Jump']) fadeToAction('Jump', 0.2);
+
+                        loginBtn.innerText = "ACCESS GRANTED";
+                        loginBtn.style.background = "#00ff88";
+
+                        setTimeout(() => window.location.href = 'dashboard.html', 1000);
+                    } else {
+                        errorMsg.innerText = data.detail || "OTP VERIFICATION FAILED";
+                        errorMsg.style.opacity = 1;
+                        if (typeof fadeToAction === "function" && actions['No']) fadeToAction('No', 0.2);
+                    }
+                } catch (err) {
+                    console.error("OTP Error", err);
+                    errorMsg.innerText = "CONNECTION FAILURE";
+                    errorMsg.style.opacity = 1;
+                }
+                return;
+            }
+
+            // --- STEP 1: INITIAL LOGIN ---
+            try {
+                // Prepare form data for OAuth2
+                const formData = new URLSearchParams();
+                formData.append('username', username);
+                formData.append('password', password);
+
+                const response = await fetch('/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: formData
+                });
+
+                if (response.status === 202) {
+                    // 2FA REQUIRED
+                    const data = await response.json();
+
+                    // Switch UI to OTP Mode
+                    isOtpStep = true;
+                    document.getElementById('password').parentElement.style.display = 'none'; // Hide password
+                    otpGroup.style.display = 'block'; // Show OTP
+                    loginBtn.innerText = "VERIFY UPLINK CODE";
+                    errorMsg.style.opacity = 0;
+
+                    // Focus OTP
+                    setTimeout(() => otpInput.focus(), 100);
+
+                } else if (response.ok) {
+                    // DIRECT LOGIN (Fallback if 2FA disabled)
+                    const data = await response.json();
+                    localStorage.setItem('isAuthenticated', 'true');
+                    localStorage.setItem('token', data.access_token);
+                    localStorage.setItem('username', username);
+                    setTimeout(() => window.location.href = 'dashboard.html', 1500);
+                } else {
+                    // FAIL
+                    if (typeof fadeToAction === "function" && actions['No']) fadeToAction('No', 0.2);
+                    errorMsg.innerText = "ACCESS DENIED: INVALID CREDENTIALS";
+                    errorMsg.style.opacity = 1;
+                }
+            } catch (err) {
+                console.error("Login Network Error", err);
+                errorMsg.innerText = "SERVER UNREACHABLE";
+                errorMsg.style.opacity = 1;
+            }
+        });
+
+        waveBtn.addEventListener('click', () => {
+            window.triggerAction('Wave');
+        });
+
+        // --- Animation Loop ---
+        const clock = new THREE.Clock();
+        let isFlying = false;
+
+        // Mouse tracking
+        const mouse = new THREE.Vector2();
+        document.addEventListener('mousemove', (event) => {
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        });
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const delta = clock.getDelta();
+            if (mixer) mixer.update(delta);
+
+            if (astronaut && isFlying) {
+                astronaut.position.y += 0.1;
+                astronaut.position.z -= 0.1;
+                updateParticles();
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        function updateParticles() {
+            if (!particles || !astronaut) return;
+            const positions = particles.geometry.attributes.position.array;
+            const emitterPos = astronaut.position.clone();
+            emitterPos.y += 1.0;
+            for (let i = 0; i < positions.length; i += 3) {
+                positions[i + 1] -= 0.1;
+                if (positions[i + 1] < -5 || Math.random() > 0.9) {
+                    positions[i] = emitterPos.x + (Math.random() - 0.5) * 0.5;
+                    positions[i + 1] = emitterPos.y;
+                    positions[i + 2] = emitterPos.z + (Math.random() - 0.5) * 0.5;
+                }
+            }
+            particles.geometry.attributes.position.needsUpdate = true;
+        }
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        animate();
+
+        // AUTO-WAVE: Auto-click the wave button once after page loads
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const waveBtn = document.getElementById('wave-btn');
+                if (waveBtn) {
+                    waveBtn.click();
+                }
+            }, 2000);
+
+            // Repeat every 10 seconds
+            setInterval(() => {
+                const waveBtn = document.getElementById('wave-btn');
+                if (waveBtn) {
+                    waveBtn.click();
+                }
+            }, 10000);
+        });
+    </script>
+</body>
+
+</html>

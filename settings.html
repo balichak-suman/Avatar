@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Settings | Cosmic Oracle</title>
+    <script>if (!localStorage.getItem("isAuthenticated")) window.location.href = "login.html";</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="src/static/css/style.css?v=20">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <style>
+        .settings-content {
+            padding: 40px;
+            overflow-y: auto;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .page-header {
+            margin-bottom: 10px;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .page-subtitle {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Custom Toggle Style */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.1);
+            transition: .4s;
+            border-radius: 24px;
+            border: 1px solid rgba(0, 243, 255, 0.3);
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 3px;
+            background-color: #fff;
+            transition: .4s;
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.5);
+        }
+
+        input:checked+.slider {
+            background-color: rgba(0, 243, 255, 0.2);
+        }
+
+        input:focus+.slider {
+            box-shadow: 0 0 1px #2196F3;
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(26px);
+            background-color: var(--primary-cyan);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <div class="header-title">Mission Control: System Configuration</div>
+            <div class="header-controls">
+                <div class="icon-btn" title="User Profile">👤</div>
+            </div>
+        </header>
+
+        <aside class="sidebar">
+            <div class="sidebar-box">
+                <a href="dashboard.html" style="text-decoration: none;">
+                    <div class="nav-item">
+                        <span class="nav-icon">⚡</span>
+                        <span>Dashboard</span>
+                    </div>
+                </a>
+                <a href="explore.html" style="text-decoration: none;">
+                    <div class="nav-item">
+                        <span class="nav-icon">🔭</span>
+                        <span>Explore</span>
+                    </div>
+                </a>
+                <a href="datastreams.html" style="text-decoration: none;">
+                    <div class="nav-item">
+                        <span class="nav-icon">📡</span>
+                        <span>Data Streams</span>
+                    </div>
+                </a>
+                <a href="pipeline.html" style="text-decoration: none;">
+                    <div class="nav-item">
+                        <span class="nav-icon">🧠</span>
+                        <span>AI Models</span>
+                    </div>
+                </a>
+                <a href="about.html" style="text-decoration: none;">
+                    <div class="nav-item">
+                        <span class="nav-icon">ℹ️</span>
+                        <span>About</span>
+                    </div>
+                </a>
+                <div class="nav-item active">
+                    <span class="nav-icon">⚙️</span>
+                    <span>Settings</span>
+                </div>
+            </div>
+        </aside>
+
+        <main class="main-content" style="grid-area: center / center / bottom-2 / right;">
+            <div class="glass-panel" style="height: 100%; width: 100%;">
+                <div class="settings-content">
+                    <div class="page-header">
+                        <h1 class="page-title">System Settings</h1>
+                        <p class="page-subtitle">Configure uplink protocols and interface aesthetics</p>
+                    </div>
+
+                    <div class="settings-grid">
+                        <!-- AI COMMANDER CARD -->
+                        <div class="settings-card">
+                            <h3 class="widget-header">AI COMMANDER</h3>
+                            <div class="settings-option">
+                                <div class="option-info">
+                                    <span class="option-label">Personality Uplink</span>
+                                    <span class="option-desc">Toggle between Technical and Narrative response
+                                        modes</span>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" checked id="setting-ai-personality">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="settings-option">
+                                <div class="option-info">
+                                    <span class="option-label">Auto-Greeting</span>
+                                    <span class="option-desc">Commander initiates contact upon session start</span>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="setting-ai-greet">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- VISUALS CARD -->
+                        <div class="settings-card">
+                            <h3 class="widget-header">INTERFACE VISUALS</h3>
+                            <div class="settings-option">
+                                <div class="option-info">
+                                    <span class="option-label">High-Res Textures</span>
+                                    <span class="option-desc">Enable 4K planetary surfaces (Requires restart)</span>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" checked id="setting-highres">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="settings-option">
+                                <div class="option-info">
+                                    <span class="option-label">Scanline Overlay</span>
+                                    <span class="option-desc">Retro CRT telemetry aesthetic</span>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="setting-scanlines">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- TELEMETRY CARD -->
+                        <div class="settings-card">
+                            <h3 class="widget-header">TELEMETRY & DATA</h3>
+                            <div class="settings-option">
+                                <div class="option-info">
+                                    <span class="option-label">Deep Space Polling</span>
+                                    <span class="option-desc">Real-time NASA/NOAA API synchronization</span>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" checked id="setting-polling">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="settings-option">
+                                <div class="option-info">
+                                    <span class="option-label">Audio Feedback</span>
+                                    <span class="option-desc">System beeps and data-stream sonification</span>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" checked id="setting-audio">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="app-footer">
+            <div class="status-item"><span class="neon-text">●</span> SYSTEM: STABLE</div>
+            <div class="status-item"><span class="neon-text">●</span> UPLINK: ACTIVE</div>
+            <div class="status-item">VERSION: 1.2.0-ORACLE</div>
+        </footer>
+    </div>
+
+    <script type="module">
+        import { ChatWidget } from './src/static/js/modules/chat_widget.js?v=RC2';
+
+        // Initialize Avatar
+        new ChatWidget();
+
+        // Handle Settings Persistence
+        const settings = ['ai-personality', 'ai-greet', 'highres', 'scanlines', 'polling', 'audio'];
+        settings.forEach(s => {
+            const el = document.getElementById(`setting-${s}`);
+            const val = localStorage.getItem(`setting_${s}`);
+            if (val !== null) el.checked = val === 'true';
+
+            el.addEventListener('change', () => {
+                localStorage.setItem(`setting_${s}`, el.checked);
+                console.log(`Setting ${s} changed to ${el.checked}`);
+            });
+        });
+    </script>
+</body>
+
+</html>

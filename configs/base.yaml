@@ -1,0 +1,64 @@
+project:
+  name: "Adaptive MLOps and Few-Shot Learning Framework for Rare Cosmic Event Detection"
+  version: 0.1.0
+
+paths:
+  data_root: data
+  raw: data/raw
+  interim: data/interim
+  processed: data/processed
+  external: data/external
+  models: artifacts/models
+
+mlflow:
+  tracking_uri: http://localhost:5000
+  experiment: Adaptive-MLOps-FewShot
+
+dvc:
+  remote: cosmic-storage
+
+data_sources:
+  ztf:
+    description: "Zwicky Transient Facility alert streams"
+    access: "https://ztf.uw.edu/alerts/public"
+    auth_env: "ZTF_API_TOKEN"
+    api_url: "https://ztf.uw.edu/alerts/public"
+    irsa:
+      base_url: "https://irsa.ipac.caltech.edu/ibe/search/ztf/products/sci"
+      timeout: 120  # Increased for slow network
+      format: "json"
+      max_rows: 10  # Reduced for faster response
+      filters: ["zg", "zr"]
+      cone_search:
+        ra: 210.8023
+        dec: 54.3489
+        radius: 0.001
+      # mjd_range: [59800, 59850]
+  tess:
+    description: "Transiting Exoplanet Survey Satellite light curves"
+    access: "https://mast.stsci.edu/tesscut/api/v0.1"
+    auth_env: "TESS_API_TOKEN"
+    tesscut_url: "https://mast.stsci.edu/tesscut/api/v0.1"
+    targets: ["Tic 25155310", "Tic 233087856", "Tic 261136679", "Tic 441462736"] # Known exoplanet hosts
+    download_url: "https://mast.stsci.edu/tesscut/api/v0.1/astrocut"
+    query:
+      pagesize: 5
+      columns: ["obsid", "target_name", "sequence_number"]
+      filters:
+        obs_collection: ["TESS"]
+    lightcurve:
+      flux_columns: ["PDCSAP_FLUX", "SAP_FLUX"]
+      time_column: "TIME"
+      max_points: 500
+  mast:
+    description: "Mikulski Archive for Space Telescopes metadata"
+    access: "https://mast.stsci.edu"
+    auth_env: "MAST_API_TOKEN"
+    invoke_url: "https://mast.stsci.edu/api/v0/invoke"
+    service: "Mast.Caom.Filtered"
+    query:
+      pagesize: 20
+      columns: "obsid,instrument_name,target_name,t_exptime,wavelength_region"
+      filters:
+        obs_collection: ["HST"]
+        dataproduct_type: ["image"]

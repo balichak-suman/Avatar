@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmic Oracle | AI Models</title>
+    <script>if (!localStorage.getItem("isAuthenticated")) window.location.href = "login.html";</script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Inter:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="src/static/css/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Page-specific override for Pipeline View to force full width */
+        .app-container {
+            grid-template-columns: 260px 1fr !important;
+            grid-template-areas:
+                "header header"
+                "sidebar center" !important;
+            grid-template-rows: 70px 1fr !important;
+            /* Force 2 rows: Header, Center */
+            overflow: hidden !important;
+            /* Ensure main container doesn't scroll, only inner regions do */
+        }
+
+        .footer {
+            display: none !important;
+        }
+
+        /* Hide right panel area just in case */
+        .right-panel {
+            display: none !important;
+        }
+
+        /* Ensure main content fills the 'center' area which is now 1fr of the remaining space */
+        .main-content {
+            grid-area: center !important;
+            grid-column: 2 / -1 !important;
+            /* Force col 2 to end */
+            grid-row: 2 / -1 !important;
+            /* Force row 2 to end */
+            width: 100% !important;
+            height: 100% !important;
+            /* Explicit height */
+            max-width: none !important;
+            overflow-y: auto;
+            position: relative;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo-container">
+                <div class="logo-icon"></div>
+                <h1>ADAPTIVE COSMIC ORACLE</h1>
+            </div>
+            <div class="header-controls">
+                <div class="status-indicator online">
+                    <span class="status-dot"></span>
+                    SYSTEM ONLINE
+                </div>
+            </div>
+        </header>
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-box">
+                <a href="dashboard.html" style="text-decoration: none;">
+                    <div class="nav-item">
+                        <span class="nav-icon">⚡</span>
+                        <span>Dashboard</span>
+                    </div>
+                </a>
+                <a href="explore.html" style="text-decoration: none;">
+                    <div class="nav-item">
+                        <span class="nav-icon">🔭</span>
+                        <span>Explore</span>
+                    </div>
+                </a>
+                <a href="datastreams.html" style="text-decoration: none;">
+                    <div class="nav-item">
+                        <span class="nav-icon">📡</span>
+                        <span>Data Streams</span>
+                    </div>
+                </a>
+                <div class="nav-item active">
+                    <span class="nav-icon">🧠</span>
+                    <span>AI Models</span>
+                </div>
+                <a href="about.html" style="text-decoration: none;">
+                    <div class="nav-item">
+                        <span class="nav-icon">ℹ️</span>
+                        <span>About</span>
+                    </div>
+                </a>
+                <a href="settings.html" style="text-decoration: none;">
+                    <div class="nav-item">
+                        <span class="nav-icon">⚙️</span>
+                        <span>Settings</span>
+                    </div>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content (Full Width for Pipeline - Spans to End) -->
+        <main class="main-content">
+            <div id="pipeline-container" style="width: 100%; height: 100%; padding-bottom: 20px;">
+                <!-- Pipeline View will be rendered here -->
+            </div>
+        </main>
+
+        <!-- Footer Removed Request -->
+    </div>
+
+    <!-- Inline Script to Initialize Pipeline View -->
+    <script type="module">
+        import { renderPipeline, updatePipelineValues } from './src/static/js/modules/pipeline_core.js?v=1002';
+        import { store } from './src/static/js/app.js?v=70';
+
+        // Wait for store to be ready then render
+        const init = () => {
+            if (store && store.pipeline) {
+                renderPipeline(document.getElementById('pipeline-container'), store);
+
+                // Start Update Loop for Real-Time Data (Every 1s)
+                setInterval(() => {
+                    updatePipelineValues(store);
+                }, 1000);
+
+            } else {
+                // Fallback / Wait logic if store is slow
+                setTimeout(init, 500);
+            }
+        };
+        init();
+    </script>
+</body>
+
+</html>

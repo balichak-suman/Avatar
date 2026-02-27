@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adaptive Cosmic Oracle | Event Detection</title>
+    <script>if (!localStorage.getItem("isAuthenticated")) window.location.href = "login.html";</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="src/static/css/style.css?v=20">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script>
+        console.log('Dashboard HTML loaded - Cache Bust v6');
+        console.log('THREE available:', !!window.THREE);
+        window.addEventListener('error', function (e) {
+            console.error('Global error:', e.message);
+        });
+    </script>
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Global Header -->
+        <header class="app-header">
+            <div class="header-title">Adaptive Cosmic Oracle: Predictive Analytics Suite</div>
+            <div class="header-controls">
+                <div class="icon-btn" title="Notifications">🔔</div>
+                <div class="icon-btn" title="User Profile">
+                    👤 <span id="user-profile-name" style="font-size: 0.8rem; margin-left: 5px;">Loading...</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-box">
+                <div class="nav-item active">
+                    <span class="nav-icon">⚡</span>
+                    <span>Dashboard</span>
+                </div>
+                <a href="explore.html" style="text-decoration: none;">
+                    <div class="nav-item">
+                        <span class="nav-icon">🔭</span>
+                        <span>Explore</span>
+                    </div>
+                </a>
+                <a href="datastreams.html" style="text-decoration: none;">
+                    <div class="nav-item">
+                        <span class="nav-icon">📡</span>
+                        <span>Data Streams</span>
+                    </div>
+                </a>
+                <a href="pipeline.html" style="text-decoration: none;">
+                    <div class="nav-item">
+                        <span class="nav-icon">🧠</span>
+                        <span>AI Models</span>
+                    </div>
+                </a>
+                <a href="about.html" style="text-decoration: none;">
+                    <div class="nav-item">
+                        <span class="nav-icon">ℹ️</span>
+                        <span>About</span>
+                    </div>
+                </a>
+                <a href="settings.html" style="text-decoration: none;">
+                    <div class="nav-item">
+                        <span class="nav-icon">⚙️</span>
+                        <span>Settings</span>
+                    </div>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Center Content (Globe) -->
+        <main class="main-content">
+            <div class="center-panel glass-panel">
+                <!-- Globe/Map Container -->
+                <div id="globe-container" style="width: 100%; height: 100%; overflow: hidden;">
+                    <!-- 3D Globe will be rendered here -->
+                </div>
+
+                <!-- Bottom Controls in Center Panel -->
+                <div class="map-controls">
+                    <button class="control-btn active">🌐</button>
+                    <button class="control-btn">👁️</button>
+                    <button class="control-btn">🎯</button>
+                </div>
+            </div>
+        </main>
+
+        <!-- Right Panel (Widgets) -->
+        <aside class="right-panel">
+            <!-- Upcoming Predictions Widget -->
+            <div id="predictions-widget" class="widget-box glass-panel">
+                <div class="widget-header">UPCOMING PREDICTIONS</div>
+                <div id="upcoming-predictions-list" class="prediction-scroll-container">
+                    <div style="padding: 10px; color: #64748b;">Initializing Stream...</div>
+                </div>
+            </div>
+
+            <!-- Solar Activity Forecast Widget -->
+            <div class="widget-box glass-panel">
+                <div class="widget-header" style="font-size: 0.7rem; margin-bottom: 2px;">SOLAR RADIATION</div>
+                <div id="solar-readout"
+                    style="font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; color: #8b5cf6; margin-bottom: 4px;">
+                    Initializing...</div>
+                <div class="chart-container">
+                    <canvas id="solarChart"></canvas>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Bottom Panels -->
+        <!-- Bottom Panels -->
+        <section class="bottom-panel-1 glass-panel">
+            <div class="widget-header">DATA INJECTION</div>
+            <!-- Enhanced Widget Structure -->
+            <div class="injection-panel">
+                <!-- Compact Tech Button -->
+                <div style="z-index: 2;">
+                    <input type="file" id="synth-upload-input" accept=".json" style="display: none;">
+                    <button id="synth-trigger-btn" class="tech-button"
+                        style="width: 160px !important; height: 36px !important; font-size: 0.65rem !important; display: flex !important; align-items: center !important; justify-content: center !important; gap: 8px !important; padding: 0 !important; border: 1px solid #00ff88; background: rgba(0, 255, 136, 0.1);">
+                        <span class="btn-icon" style="font-size: 0.8rem;">⚡</span> INJECT DATA
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section class="bottom-panel-2 glass-panel">
+            <div class="widget-header">COSMIC NEWSWIRE</div>
+            <div id="news-feed" class="prediction-scroll-container">
+                <div style="padding: 10px; color: #64748b;">Establishing Uplink...</div>
+            </div>
+        </section>
+
+        <!-- Bottom Right Panel (New Home for Neural Confidence) -->
+        <section class="bottom-panel-right glass-panel" style="padding: 0; overflow: hidden; position: relative;">
+            <div id="earth-container" style="width: 100%; height: 100%; position: relative;">
+                <!-- Loading State -->
+                <div id="earth-loading"
+                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); z-index: 10;">
+                    <span style="color: #64748b; font-size: 0.8rem;">Initializing Satellite Feed...</span>
+                </div>
+
+                <!-- Main Image -->
+                <img id="earth-image" src="" alt="Live Earth View"
+                    style="width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 1s ease;">
+
+                <!-- Overlay Info -->
+                <div class="earth-overlay"
+                    style="position: absolute; bottom: 0; left: 0; width: 100%; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); padding: 12px; pointer-events: none;">
+
+                    <!-- Satellite Name -->
+                    <div id="earth-sat-name"
+                        style="font-size: 0.65rem; color: #facc15; font-family: 'JetBrains Mono'; margin-bottom: 2px;">
+                        Loading...</div>
+
+                    <!-- Title/Region -->
+                    <div id="earth-title"
+                        style="font-size: 0.9rem; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                        Scanning Region...</div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- User Profile Modal -->
+        <div id="profile-modal" class="modal-overlay">
+            <div class="profile-modal">
+                <div class="modal-header">
+                    <div class="modal-title">COSMIC ORACLE: <span>USER PROFILE</span></div>
+                    <button class="close-btn" id="close-profile">×</button>
+                </div>
+                <div class="modal-content">
+                    <!-- Left: Identity -->
+                    <div class="profile-card">
+                        <div class="hex-avatar-container">
+                            <div class="hex-border">
+                                <div class="hex-inner">
+                                    <div class="avatar-icon">👤</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="profile-name" id="modal-username">Loading...</div>
+                        <div class="profile-detail">Rank: <span id="modal-rank">...</span></div>
+                        <div class="profile-detail">Clearance: <span id="modal-clearance">...</span></div>
+                        <div class="profile-detail">Joined: <span id="modal-joined">...</span></div>
+                        <button class="edit-btn">Edit Profile</button>
+                    </div>
+
+                    <!-- Right: Stats & Activity -->
+                    <div class="stats-column">
+                        <!-- User Activity Removed (No real data yet) -->
+
+                        <!-- Recent Activity -->
+                        <div class="stats-box">
+                            <div class="stats-header">RECENT ACTIVITY</div>
+                            <div class="activity-list" id="modal-activity-list">
+                                <!-- Populated by JS -->
+                                <div class="act-item">Loading activity...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Global Footer -->
+
+    </div>
+
+    <script type="module" src="src/static/js/app.js?v=70"></script>
+</body>
+
+</html>

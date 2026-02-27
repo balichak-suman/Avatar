@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About | Cosmic Oracle</title>
+    <script>if (!localStorage.getItem("isAuthenticated")) window.location.href = "login.html";</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="src/static/css/style.css?v=about">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+</head>
+
+<body>
+    <div class="app-container about-layout">
+        <!-- Global Header -->
+        <header class="app-header">
+            <div class="header-title">Adaptive Cosmic Oracle: Mission Control</div>
+            <div class="header-controls">
+                <div class="icon-btn" title="Notifications">🔔</div>
+                <div class="icon-btn" title="User Profile">👤</div>
+            </div>
+        </header>
+
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-box">
+                <a href="dashboard.html" style="text-decoration: none;">
+                    <div class="nav-item">
+                        <span class="nav-icon">⚡</span>
+                        <span>Dashboard</span>
+                    </div>
+                </a>
+                <a href="explore.html" style="text-decoration: none;">
+                    <div class="nav-item">
+                        <span class="nav-icon">🔭</span>
+                        <span>Explore</span>
+                    </div>
+                </a>
+                <a href="datastreams.html" style="text-decoration: none;">
+                    <div class="nav-item">
+                        <span class="nav-icon">📡</span>
+                        <span>Data Streams</span>
+                    </div>
+                </a>
+                <a href="pipeline.html" style="text-decoration: none;">
+                    <div class="nav-item">
+                        <span class="nav-icon">🧠</span>
+                        <span>AI Models</span>
+                    </div>
+                </a>
+                <div class="nav-item active">
+                    <span class="nav-icon">ℹ️</span>
+                    <span>About</span>
+                </div>
+                <a href="settings.html" style="text-decoration: none;">
+                    <div class="nav-item">
+                        <span class="nav-icon">⚙️</span>
+                        <span>Settings</span>
+                    </div>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content about-main">
+            <div class="about-hero">
+                <h1>About Cosmic Oracle</h1>
+                <p class="subtitle">Our Story. Our Mission. Our Team.</p>
+                <p class="hero-description">An Adaptive MLOps and Few-Shot Learning Framework for real-time detection of
+                    rare cosmic anomalies. We transform raw satellite telemetry into actionable scientific discoveries.
+                </p>
+            </div>
+
+            <section class="team-section">
+                <div class="section-title">Meet the Team</div>
+                <div class="team-grid">
+                    <div class="team-card glass-panel">
+                        <div class="team-photo-container">
+                            <img src="src/static/img/team/suman.jpg" alt="Balichak Suman" class="photo-suman">
+                        </div>
+                        <h3>Balichak Suman</h3>
+                        <p class="role">22R21A67D5</p>
+                    </div>
+                    <div class="team-card glass-panel">
+                        <div class="team-photo-container">
+                            <img src="src/static/img/team/sravan.png" alt="Sravan" class="photo-sravan">
+                        </div>
+                        <h3>Sravan</h3>
+                        <p class="role">22R21A67D7</p>
+                    </div>
+                    <div class="team-card glass-panel">
+                        <div class="team-photo-container">
+                            <img src="src/static/img/team/surya.jpg" alt="Surya">
+                        </div>
+                        <h3>Surya</h3>
+                        <p class="role">22R21A67G5</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="app-footer">
+            <span>Copyright 2024 - social links - Late</span>
+            <div class="footer-social">
+                <span>in</span>
+                <span>git</span>
+                <span>📸</span>
+                <span>🔗</span>
+            </div>
+        </footer>
+    </div>
+    <!-- Initialize App and AI -->
+    <script type="module">
+        import './src/static/js/app.js?v=71';
+    </script>
+</body>
+
+</html>

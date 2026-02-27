@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Environments
+.env
+.venv
+venv/
+ENV/
+
+# Jupyter
+.ipynb_checkpoints/
+.notebooks_cache/
+
+# Data & Artifacts
+/data/raw/**
+/data/interim/**
+/data/processed/**
+/data/external/**
+!data/.gitkeep
+!data/**/*.dvc
+
+# DVC
+.cache/
+!.dvc/
+
+# Logs
+logs/
+*.log
+
+# IDE
+.vscode/
+.idea/
+
+# System
+.DS_Store
+
+# MLflow
+mlruns/
+artifacts/
+
+sql_app.db
+login_original.mp4

@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Redirecting...</title>
+    <script>
+        if (localStorage.getItem("isAuthenticated")) {
+            window.location.href = "dashboard.html";
+        } else {
+            window.location.href = "login.html";
+        }
+    </script>
+</head>
+
+<body>
+    <p>Redirecting to secure terminal...</p>
+</body>
+
+</html>

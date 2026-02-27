@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adaptive Cosmic Oracle | Mission Control</title>
+    <script>if (!localStorage.getItem("isAuthenticated")) window.location.href = "login.html";</script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="src/static/css/style.css?v=20">
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        .app-container {
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            grid-template-rows: 70px 1fr;
+            grid-template-areas: "header header" "sidebar center";
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+        }
+
+        .console-grid {
+            display: grid;
+            grid-template-columns: 72% 28%;
+            grid-template-rows: 55% 45%;
+            gap: 12px;
+            height: 100%;
+            width: 100%;
+            padding: 12px;
+            overflow: hidden;
+        }
+
+        /* 1. TERMINALS */
+        .split-terminal-container {
+            grid-column: 1 / 2;
+            grid-row: 1 / 2;
+            display: flex;
+            gap: 12px;
+            min-height: 0;
+            width: 100%;
+        }
+
+        .terminal-window {
+            flex: 1;
+            background: rgba(10, 10, 15, 0.9);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .terminal-header {
+            height: 32px;
+            background: rgba(15, 23, 42, 0.8);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 10px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: #94a3b8;
+            flex-shrink: 0;
+        }
+
+        .terminal-content {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            line-height: 1.3;
+        }
+
+        .terminal-content::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .terminal-content::-webkit-scrollbar-thumb {
+            background: rgba(59, 130, 246, 0.4);
+            border-radius: 2px;
+        }
+
+        .log-entry {
+            margin-bottom: 6px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .log-entry pre {
+            white-space: pre-wrap;
+            word-break: break-all;
+            margin: 0;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .timestamp {
+            color: #52525b;
+            font-size: 0.65rem;
+            margin-right: 6px;
+        }
+
+        /* 2. 3D VIZ */
+        .packet-viz {
+            grid-column: 1 / 2;
+            grid-row: 2 / 3;
+            background: rgba(10, 10, 15, 0.6);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* 3. METRICS */
+        .metrics-sidebar {
+            grid-column: 2 / 3;
+            grid-row: 1 / 3;
+            background: rgba(15, 23, 42, 0.4);
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: 0 0 0 12px;
+            overflow-y: auto;
+        }
+
+        .meter-box {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 12px;
+            border-radius: 4px;
+        }
+
+        .meter-label {
+            font-size: 0.65rem;
+            color: #94a3b8;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .meter-val {
+            font-size: 1.4rem;
+            color: #fff;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* HUD & DECORATIONS */
+        .scanline {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: rgba(0, 243, 255, 0.2);
+            animation: scan 4s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes scan {
+            0% {
+                top: 0%;
+            }
+
+            100% {
+                top: 100%;
+            }
+        }
+
+        .hud-corner {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border: 2px solid rgba(0, 243, 255, 0.5);
+            pointer-events: none;
+        }
+
+        .hud-tl {
+            top: 4px;
+            left: 4px;
+            border-right: 0;
+            border-bottom: 0;
+        }
+
+        .hud-tr {
+            top: 4px;
+            right: 4px;
+            border-left: 0;
+            border-bottom: 0;
+        }
+
+        .hud-bl {
+            bottom: 4px;
+            left: 4px;
+            border-right: 0;
+            border-top: 0;
+        }
+
+        .hud-br {
+            bottom: 4px;
+            right: 4px;
+            border-left: 0;
+            border-top: 0;
+        }
+
+        .spectrum-container {
+            display: flex;
+            align-items: flex-end;
+            gap: 2px;
+            height: 40px;
+            margin-top: 5px;
+            opacity: 0.8;
+        }
+
+        .spec-bar {
+            flex: 1;
+            background: #3b82f6;
+            animation: bounce 0.5s infinite alternate;
+        }
+
+        @keyframes bounce {
+            0% {
+                height: 10%;
+            }
+
+            100% {
+                height: 100%;
+            }
+        }
+
+        /* Simulation Controls */
+        .sim-grid-vertical {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: auto;
+        }
+
+        .sim-btn {
+            background: rgba(20, 30, 50, 0.8);
+            border: 1px solid rgba(59, 130, 246, 0.4);
+            color: #bfdbfe;
+            font-family: 'JetBrains Mono';
+            font-size: 0.65rem;
+            padding: 10px;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-radius: 2px;
+        }
+
+        .sim-btn:hover {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: #3b82f6;
+        }
+
+        .sim-btn:active {
+            transform: scale(0.98);
+        }
+
+        .sim-btn.warning {
+            border-color: rgba(239, 68, 68, 0.4);
+            color: #fecaca;
+        }
+
+        .sim-btn.warning:hover {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: #ef4444;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Global Header -->
+        <header class="app-header">
+            <div class="header-title">COSMIC ORACLE: NETWORK OPERATIONS</div>
+            <div class="header-controls">
+                <div class="icon-btn">📶 14ms</div>
+                <div class="icon-btn">👤 COMMODORE</div>
+            </div>
+        </header>
+
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-box">
+                <a href="dashboard.html" style="text-decoration: none;">
+                    <div class="nav-item">
+                        <span class="nav-icon">⚡</span>
+                        <span>Dashboard</span>
+                    </div>
+                </a>
+                <a href="explore.html" style="text-decoration: none;">
+                    <div class="nav-item">
+                        <span class="nav-icon">🔭</span>
+                        <span>Explore</span>
+                    </div>
+                </a>
+                <div class="nav-item active">
+                    <span class="nav-icon">📡</span>
+                    <span>Data Streams</span>
+                </div>
+                <a href="pipeline.html" style="text-decoration: none;">
+                    <div class="nav-item">
+                        <span class="nav-icon">🧠</span>
+                        <span>AI Models</span>
+                    </div>
+                </a>
+                <a href="about.html" style="text-decoration: none;">
+                    <div class="nav-item">
+                        <span class="nav-icon">ℹ️</span>
+                        <span>About</span>
+                    </div>
+                </a>
+                <a href="settings.html" style="text-decoration: none;">
+                    <div class="nav-item">
+                        <span class="nav-icon">⚙️</span>
+                        <span>Settings</span>
+                    </div>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content" style="grid-column: 2 / -1;">
+            <div class="console-grid">
+
+                <!-- 1. TERMINALS (ZTF + TESS) -->
+                <div class="split-terminal-container">
+                    <!-- LEFT: ZTF -->
+                    <div class="terminal-window">
+                        <div class="terminal-header">
+                            <span style="color:#60a5fa">APS-1: ZTF FEED</span>
+                            <span style="color:#4ade80; font-size:0.6rem">● LIVE</span>
+                        </div>
+                        <div id="ztf-terminal" class="terminal-content"></div>
+                        <div class="scanline"></div>
+                        <div class="hud-corner hud-tl"></div>
+                        <div class="hud-corner hud-tr"></div>
+                        <div class="hud-corner hud-bl"></div>
+                        <div class="hud-corner hud-br"></div>
+                    </div>
+                    <!-- RIGHT: TESS -->
+                    <div class="terminal-window" style="border-color: rgba(167, 139, 250, 0.3);">
+                        <div class="terminal-header">
+                            <span style="color:#a78bfa">APS-2: TESS FEED</span>
+                            <span style="color:#4ade80; font-size:0.6rem">● LINKED</span>
+                        </div>
+                        <div id="tess-terminal" class="terminal-content"></div>
+                        <div class="scanline" style="animation-duration: 5s;"></div>
+                        <div class="hud-corner hud-tl" style="border-color:rgba(167, 139, 250, 0.5)"></div>
+                        <div class="hud-corner hud-tr" style="border-color:rgba(167, 139, 250, 0.5)"></div>
+                    </div>
+                </div>
+
+                <!-- 2. VISUALIZATION & CONTROL DECK (Bottom Left - Split) -->
+                <div class="packet-viz" style="display:flex;">
+                    <!-- LEFT: 3D Globe -->
+                    <div id="scene-container"
+                        style="flex: 3; position:relative; overflow:hidden; border-right:1px solid rgba(59,130,246,0.2);">
+                        <div
+                            style="position:absolute; top:10px; left:10px; color:rgba(255,255,255,0.5); font-size:0.6rem; z-index:10; font-family:'Orbitron'">
+                            CELESTIAL SPHERE // MAPPING
+                        </div>
+                    </div>
+
+                    <!-- RIGHT: Synthetic Controls -->
+                    <div class="synth-panel"
+                        style="flex: 2; padding:10px; display:flex; flex-direction:column; gap:10px; background:rgba(15,23,42,0.4);">
+                        <div
+                            style="font-family:'Orbitron'; color:#00f3ff; font-size:0.75rem; border-bottom:1px solid rgba(0,243,255,0.2); padding-bottom:4px">
+                            SYNTHETIC DATA GEN (AI)
+                        </div>
+                        <div style="font-size:0.7rem; color:#94a3b8; line-height:1.4;">
+                            Describe the event you want to generate using natural language.
+                        </div>
+
+                        <!-- AI ONLY UI -->
+                        <div style="margin-top: 5px; flex-grow: 1; display: flex; flex-direction: column;">
+                            <textarea id="ai-prompt"
+                                placeholder="Cmd: 'Generate a massive supernova with high noise...'"
+                                style="width: 100%; flex-grow: 1; background: rgba(0,0,0,0.3); border: 1px solid #3b82f6; color: #fff; padding: 10px; border-radius: 4px; font-family: 'JetBrains Mono'; font-size: 0.85rem; margin-bottom: 10px; resize: none;"></textarea>
+
+                            <button class="sim-btn" onclick="injectEventAI()"
+                                style="width: 100%; justify-content: center; background: rgba(59, 130, 246, 0.25); border: 1px solid #3b82f6; padding: 12px;">
+                                <span class="btn-icon">✨</span> GENERATE EVENT
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. METRICS SIDEBAR -->
+                <div class="metrics-sidebar">
+                    <div class="meter-box">
+                        <div class="meter-label">Signal Spectrum</div>
+                        <div class="spectrum-container">
+                            <div class="spec-bar" style="animation-delay:0s"></div>
+                            <div class="spec-bar" style="animation-delay:0.2s; background:#8b5cf6"></div>
+                            <div class="spec-bar" style="animation-delay:0.1s"></div>
+                            <div class="spec-bar" style="animation-delay:0.3s; background:#00f3ff"></div>
+                            <div class="spec-bar" style="animation-delay:0.15s"></div>
+                        </div>
+                    </div>
+                    <div class="meter-box">
+                        <div class="meter-label">Stream Rate</div>
+                        <div><span id="ingest-rate" class="meter-val">1.2</span> <span
+                                style="font-size:0.7rem; color:#64748b">GB/s</span></div>
+                    </div>
+                    <div class="meter-box">
+                        <div class="meter-label">Active Packets</div>
+                        <div><span id="active-packets" class="meter-val">842</span></div>
+                    </div>
+                    <div class="meter-box" style="flex-grow:1; border-color: rgba(139, 92, 246, 0.4);">
+                        <div class="meter-label">Latest Object</div>
+                        <div id="latest-id"
+                            style="font-family: monospace; color: #cbd5e1; font-size: 0.8rem; margin-top: 5px; word-break: break-all;">
+                            WAITING...</div>
+                        <div class="meter-label" style="margin-top: 15px;">Classification</div>
+                        <div id="latest-class" style="font-size: 1.1rem; color: #fff; font-weight: 600;">SCANNING</div>
+                    </div>
+                </div>
+
+            </div>
+            <!-- AI GENERATION SECTION -->
+
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="module" src="/src/static/js/datastreams.js?v=20"></script>
+</body>
+
+</html>
