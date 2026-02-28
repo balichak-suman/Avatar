@@ -298,33 +298,42 @@ async def send_otp_email(to_email: str, otp_code: str):
     <!DOCTYPE html>
     <html>
     <head>
-    <style>
-      body {{ font-family: 'Courier New', Courier, monospace; background-color: #0b0f19; color: #e2e8f0; margin: 0; padding: 20px; }}
-      .container {{ max-width: 600px; margin: 0 auto; background: #111827; border: 1px solid #3b82f6; border-radius: 8px; padding: 30px; text-align: center; box-shadow: 0 0 20px rgba(59, 130, 246, 0.2); }}
-      .header {{ font-size: 24px; font-weight: bold; color: #3b82f6; margin-bottom: 20px; letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid #1f2937; padding-bottom: 10px; }}
-      .message {{ font-size: 16px; line-height: 1.5; margin-bottom: 30px; text-align: left; }}
-      .otp-box {{ background: #1e3a8a; border: 2px dashed #60a5fa; color: #ffffff; font-size: 36px; font-weight: bold; padding: 15px 30px; border-radius: 8px; display: inline-block; margin-bottom: 20px; letter-spacing: 5px; box-shadow: inset 0 0 10px rgba(0,0,0,0.5); }}
-      .footer {{ font-size: 12px; color: #64748b; margin-top: 30px; border-top: 1px solid #1f2937; padding-top: 15px; }}
-      .highlight {{ color: #facc15; }}
-    </style>
+    <meta charset="utf-8">
+    <title>Cosmic Oracle Uplink</title>
     </head>
-    <body>
-      <div class="container">
-        <div class="header">Cosmic Oracle Uplink</div>
-        <div class="message">
-          COMMANDER,<br><br>
-          A secure uplink request has been initiated. To authenticate your session and gain access to the predictive analytics suite, please use the following clearance code:
-        </div>
-        <div class="otp-box">{otp_code}</div>
-        <div class="message" style="text-align: center; font-size: 14px;">
-          This code is highly sensitive and will self-destruct in <span class="highlight">5 minutes</span>.
-        </div>
-        <div class="footer">
-          // TRANSMISSION ORIGIN: MISSION CONTROL<br>
-          // ADAPTIVE COSMIC ORACLE V2.4<br>
-          // DO NOT SHARE THIS FREQUENCY
-        </div>
-      </div>
+    <body style="margin: 0; padding: 0; font-family: 'Courier New', Courier, monospace; background-color: #0b0f19; color: #e2e8f0;">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #0b0f19; width: 100%; margin: 0; padding: 20px 0;">
+        <tr>
+          <td align="center" style="background-color: #0b0f19;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; width: 100%; background-color: #111827; border: 1px solid #3b82f6; border-radius: 8px; text-align: center; box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);">
+              <tr>
+                <td style="padding: 30px;">
+                  <div style="font-size: 24px; font-weight: bold; color: #3b82f6; margin-bottom: 20px; letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid #1f2937; padding-bottom: 10px;">Cosmic Oracle Uplink</div>
+                  
+                  <div style="font-size: 16px; line-height: 1.5; margin-bottom: 30px; text-align: left; color: #e2e8f0;">
+                    COMMANDER,<br><br>
+                    A secure uplink request has been initiated. To authenticate your session and gain access to the predictive analytics suite, please use the following clearance code:
+                  </div>
+                  
+                  <div style="margin: 20px 0;">
+                    <span style="background-color: #1e3a8a; border: 2px dashed #60a5fa; color: #ffffff; font-size: 36px; font-weight: bold; padding: 15px 30px; border-radius: 8px; display: inline-block; letter-spacing: 5px;">{otp_code}</span>
+                  </div>
+                  
+                  <div style="text-align: center; font-size: 14px; margin-bottom: 30px; color: #e2e8f0; margin-top: 30px;">
+                    This code is highly sensitive and will self-destruct in <span style="color: #facc15;">5 minutes</span>.
+                  </div>
+                  
+                  <div style="font-size: 12px; color: #64748b; margin-top: 30px; border-top: 1px solid #1f2937; padding-top: 15px; text-align: left;">
+                    // TRANSMISSION ORIGIN: MISSION CONTROL<br>
+                    // ADAPTIVE COSMIC ORACLE V2.4<br>
+                    // DO NOT SHARE THIS FREQUENCY
+                  </div>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
     </body>
     </html>
     """
