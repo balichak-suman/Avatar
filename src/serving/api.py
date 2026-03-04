@@ -518,10 +518,7 @@ async def reset_password(request: ResetRequest, db: Session = Depends(get_db)):
 async def read_users_me(current_user: User = Depends(get_current_user)):
     return current_user
 
-@app.get("/health")
-async def health():
-    """Health check endpoint."""
-    return {"status": "healthy"}
+
 
 
 # Prediction Endpoint
